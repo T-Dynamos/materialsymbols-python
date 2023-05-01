@@ -37,3 +37,28 @@ Here's an example of how the icon would look like with its Unicode character:
 > ![Screenshot_20230501_223656](https://user-images.githubusercontent.com/68729523/235493842-0de29262-b05d-4b8d-b2b4-e80b929d361d.png)
 
 That's it! You can now use any Material Symbol for your projects.
+
+[Kivy](https://github.com/kivy/kivy) Example:
+
+```python
+from kivy.app import App
+from kivy.lang import Builder
+
+UI = Builder.load_string(
+"""
+Label:
+    text:"\ue769"
+    font_name:"fonts/Material_Symbols_Rounded-20-100-0_-25.ttf"
+    font_size:"300sp"
+    halign:"center"
+"""
+)
+
+
+class Testapp(App):
+
+    def build(self):
+        return UI
+
+Testapp().run()
+```
