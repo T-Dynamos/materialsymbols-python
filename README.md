@@ -25,6 +25,9 @@ What does this means:
 
 See More : https://m3.material.io/styles/icons/overview
 
+## Why this?
+This project exists because not all libraries support [variable fonts](https://fonts.google.com/knowledge/introducing_type/introducing_variable_fonts), such as SDL. It aims to provide a solution for using variable fonts in libraries that do not support them. By converting the variable font to a set of static fonts, this project allows for the use of variable fonts in any library that supports static fonts.
+
 ## Usage
 To use this repository, follow these steps:
 
