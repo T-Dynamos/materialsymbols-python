@@ -1,7 +1,7 @@
 import shutil
 import os
 import requests
-import json 
+import json
 
 # Possible values
 FONT_TYPE = ["Outlined", "Rounded", "Sharp"]
@@ -34,30 +34,57 @@ HEADERS = {
     "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
 }
 
+
 def convert_font(file_name):
     if shutil.which("woff2_decompress"):
         os.system("woff2_decompress {}".format(file_name))
     else:
         raise OSError("woff2_decompress is not in PATH, consider installing!")
 
+
 def get_url(font_type, optical_size, weight, grad, fill=False):
     fill_type = "1" if fill == True else "0"
     url = f"https://fonts.googleapis.com/css2?family=Material+Symbols+{font_type}:opsz,wght,FILL,GRAD@{optical_size},{weight},{fill_type},{grad}"
     return (
-        requests.get(url, headers=HEADERS).text.split("url(")[1].split(")")[0], 
-        DIR + "/Material_Symbols_"+font_type+"-"+optical_size+"-"+weight+"-"+fill_type+"_"+grad+".ttf"
+        requests.get(url, headers=HEADERS).text.split("url(")[1].split(")")[0],
+        DIR
+        + "/Material_Symbols_"
+        + font_type
+        + "-"
+        + optical_size
+        + "-"
+        + weight
+        + "-"
+        + fill_type
+        + "_"
+        + grad
+        + ".ttf",
     )
+
 
 def generate_sha256sum():
     final_data = {}
     for file in os.listdir("fonts/"):
-        final_data[file] = os.popen("sha256sum {}".format("fonts/"+file)).read().strip("\n").split(" ")[0]
+        final_data[file] = (
+            os.popen("sha256sum {}".format("fonts/" + file))
+            .read()
+            .strip("\n")
+            .split(" ")[0]
+        )
     with open("checksum.json", "w") as file:
-        json.dump(final_data , file)
+        json.dump(final_data, file)
         file.close()
+    if shutil.which("black"):
+        os.system("black checksum.json")
+    else:
+        print(
+            "Warning: black code formater was not found, json text won't be human readable"
+        )
+
 
 def main():
-    all_fonts =  []
+    TOTAL_DOWNLOADED = 0
+    all_fonts = []
 
     if os.path.exists(DIR) == False:
         os.mkdir(DIR)
@@ -67,15 +94,32 @@ def main():
             for grad in GRAD:
                 for weight in WEIGHT:
                     for fill in FILL:
-                        temp, new_filename = get_url(font_type, size, weight, grad, fill=fill)
-                        with open(new_filename[:-3]+"woff2" , "wb") as file:
+                        temp, new_filename = get_url(
+                            font_type, size, weight, grad, fill=fill
+                        )
+                        with open(new_filename[:-3] + "woff2", "wb") as file:
                             file.write(requests.get(temp).content)
-                            file.close() 
-                        convert_font(new_filename[:-3]+"woff2")
-                        os.remove(new_filename[:-3]+"woff2")
+                            TOTAL_DOWNLOADED += 1
+                            print(
+                                "\r[{}/{}]".format(
+                                    TOTAL_DOWNLOADED,
+                                    len(FONT_TYPE)
+                                    * len(OPTICAL_SIZE)
+                                    * len(GRAD)
+                                    * len(WEIGHT)
+                                    * len(FILL),
+                                ),
+                                "Downloaded : ",
+                                os.path.basename(new_filename),
+                                end="\t\t",
+                            )
+                            file.close()
+                        convert_font(new_filename[:-3] + "woff2")
+                        os.remove(new_filename[:-3] + "woff2")
                         all_fonts.append(new_filename)
-    
+
     generate_sha256sum()
-    print("Total generated : ",len(all_fonts))
+    print("Total generated : ", len(all_fonts))
+
 
 main()
