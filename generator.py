@@ -72,15 +72,8 @@ def generate_sha256sum():
             .split(" ")[0]
         )
     with open("checksum.json", "w") as file:
-        json.dump(final_data, file)
+        json.dump(final_data, file, indent = 4)
         file.close()
-    if shutil.which("black"):
-        os.system("black checksum.json")
-    else:
-        print(
-            "Warning: black code formater was not found, json text won't be human readable"
-        )
-
 
 def main():
     TOTAL_DOWNLOADED = 0
